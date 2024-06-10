@@ -1,29 +1,59 @@
-version: '3.8'
-
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
     ports:
       - "8080:80"
     volumes:
-      - .:/var/www/html
-    depends_on:
+      - .:/app/
+    links:
+      - php
       - db
-    environment:
-      - DB_HOST=db
-      - DB_NAME=business_trip_manager
-      - DB_USER=postgres
-      - DB_PASS=example
+    networks:
+      - app-network
 
   db:
     image: postgres:13
     environment:
-      POSTGRES_DB: business_trip_manager
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.10
     volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+
+#  pgadmin:
+#    image: dpage/pgadmin4:latest
+#    container_name: pg-admin
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@example.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#    ports:
+#      - "5050:80"
+#    networks:
+#      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
-  db_data:
+  pgdata:

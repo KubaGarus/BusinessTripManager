@@ -23,6 +23,7 @@ services:
       - "5432:5432"
     networks:
       app-network:
+        # ipv4_address: 127.0.0.1
         ipv4_address: 172.20.0.10
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -53,6 +54,7 @@ networks:
     driver: bridge
     ipam:
       config:
+        # - subnet: 127.0.0.0/24
         - subnet: 172.20.0.0/16
 
 volumes:

@@ -1,23 +1,33 @@
 <?php
-session_start();
+require_once __DIR__ . '/init.php';
 
-require_once __DIR__ . "/../src/Controllers/AuthController.php";
-require_once __DIR__ . "/../src/Controllers/DashboardController.php";
-$controller = new AuthController();
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? 'login';
-} else {
-    $action = $_GET['action'] ?? 'login';
-}
+use Controllers\AuthController;
+use Controllers\DashboardController;
+use Controllers\AdminController;
+use Controllers\ManagerController;
+
+$action = $_GET['action'] ?? 'login';
+$method = $_SERVER['REQUEST_METHOD'];
 
 switch ($action) {
     case 'login':
-        $controller->login();
+        $controller = new AuthController();
+        if ($method === 'POST') {
+            $controller->login();
+        } else {
+            $controller->showLoginForm();
+        }
         break;
     case 'register':
-        $controller->register();
+        $controller = new AuthController();
+        if ($method === 'POST') {
+            $controller->register();
+        } else {
+            $controller->showRegisterForm();
+        }
         break;
     case 'logout':
+        $controller = new AuthController();
         $controller->logout();
         break;
     case 'dashboard':
@@ -25,14 +35,21 @@ switch ($action) {
         $controller->showDashboard();
         break;
     case 'admin':
+        $controller = new AdminController();
         if ($controller->isAdmin()) {
-            $controller = new DashboardController();
             $controller->showAdminPanel();
         } else {
-            $controller->login();
+            $controller = new AuthController();
+            $controller->showLoginForm();
         }
         break;
+    case 'manager':
+        $controller = new ManagerController();
+        $controller->showAllBusinessTrips();
+        break;
     default:
-        $controller->login();
+        $controller = new AuthController();
+        $controller->showLoginForm();
         break;
 }
+?>

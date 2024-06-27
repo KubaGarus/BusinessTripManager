@@ -1,23 +1,25 @@
 <?php
-require_once __DIR__ . "/../../config/DatabaseConfig.php";
+namespace Models;
+
+require_once __DIR__ . '/../../config/DatabaseConfig.php';
+
+use PDO;
 
 class BusinessTrip {
-    private PDO $db;
-    private DatabaseConfig $databaseConfig;
-    private array $config;
+    private $db;
+    private $databaseConfig;
+    private $config;
 
     public function __construct()
     {
-        $this->databaseConfig = new DatabaseConfig;
+        $this->databaseConfig = new \DatabaseConfig();
         $this->config = $this->databaseConfig->getConfig();
-        $this->db = new PDO($this->config['dsn'], $this->config['username'], $this->config['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_PERSISTENT => false,
-        PDO::ATTR_EMULATE_PREPARES => false]);
+        $this->db = new PDO($this->config['dsn'], $this->config['username'], $this->config['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_PERSISTENT => false, PDO::ATTR_EMULATE_PREPARES => false]);
     }
 
     public function createBusinessTrip(int $user_id): int
     {
-        $stmt = $this->db->prepare('INSERT INTO business_trips (user_id, intrudaction_date, acceptance_date,status) VALUES (:user_id, :intrudaction_date, :acceptance_date, :status) RETURNING business_trip_id');
+        $stmt = $this->db->prepare('INSERT INTO business_trips (user_id, intrudaction_date, acceptance_date, status) VALUES (:user_id, :intrudaction_date, :acceptance_date, :status) RETURNING business_trip_id');
         $stmt->execute(["user_id" => $user_id, "intrudaction_date" => date("Y-m-d"), "acceptance_date" => NULL, "status" => 1]);
         return $stmt->fetchColumn();
     }
@@ -26,6 +28,17 @@ class BusinessTrip {
     {
         $query = $this->db->prepare('SELECT * FROM business_trips WHERE user_id = :user_id');
         $query->execute(["user_id" => $user_id]);
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllBusinessTripsForManager(): array
+    {
+        $query = $this->db->prepare(
+            'SELECT bt.*, u.firstname, u.surname
+            FROM business_trips bt
+            JOIN users u ON bt.user_id = u.user_id'
+        );
+        $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -38,8 +51,7 @@ class BusinessTrip {
     public function saveAttachment(string $fileName, string $fileType, int $fileSize, string $tmpName): int
     {
         $stmt = $this->db->prepare('INSERT INTO business_trips_expenses_attachments (name, size, type, content) VALUES (:name, :size, :type, :content) RETURNING attachment_id');
-        $stmt->execute(["name" => $fileName, "size" => $fileSize, "type" => $fileType, "content" => 1]);
-        //file_get_contents($tmpName)
+        $stmt->execute(["name" => $fileName, "size" => $fileSize, "type" => $fileType, "content" => 1]); // file_get_contents($tmpName) może być użyty do odczytu zawartości
         return $stmt->fetchColumn();
     }
 
@@ -67,4 +79,25 @@ class BusinessTrip {
             $stmt->execute($param);
         }
     }
+
+    public function updateStatus(int $businessTripID, int $status)
+    {
+        $stmt = $this->db->prepare("UPDATE business_trips SET status = :status, acceptance_date = :acceptance_date WHERE business_trip_id = :business_trip_id");
+        $stmt->execute(["status" => $status, "acceptance_date" => date("Y-m-d"), "business_trip_id" => $businessTripID]);
+    }
+
+    public function getBusinessTripById(int $tripId): array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM business_trips WHERE business_trip_id = :tripId');
+        $stmt->execute(['tripId' => $tripId]);
+        $trip = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt = $this->db->prepare('SELECT * FROM business_trips_expenses WHERE business_trip_id = :tripId');
+        $stmt->execute(['tripId' => $tripId]);
+        $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return ['trip' => $trip, 'expenses' => $expenses];
+    }
+
 }
+?>

@@ -1,10 +1,11 @@
 <?php
-require_once __DIR__ . '/../templates/header.php'; 
-require_once __DIR__ . '/../Controllers/AdminController.php';
-require_once __DIR__ . '/../Models/User.php';
+namespace Views;
 
-$adminController = new AdminController;
-$userManager = new User;
+require_once __DIR__ . '/../templates/header.php';
+require_once __DIR__ . '/../Controllers/AdminController.php';
+
+$adminController = new \Controllers\AdminController();
+$userManager = new \Models\User();
 if (isset($_POST['delete'])) {
     $adminController->deleteUserHandler($_POST['id']);
 }
@@ -27,6 +28,8 @@ if (isset($_POST['edit_user'])) {
     <nav>
         <ul>
             <li><a href="index.php?action=dashboard">Moje wydatki</a></li>
+            <li><a href="index.php?action=manager">Manager</a></li>
+            <li><a href="index.php?action=admin">Admin</a></li>
         </ul>
     </nav>
     <main class="main-content">
@@ -72,4 +75,4 @@ if (isset($_POST['edit_user'])) {
     </main>
 </div>
 <script src="/assets/js/admin.js"></script>
-<?php require '../src/templates/footer.php'; ?>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

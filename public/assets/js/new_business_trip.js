@@ -36,14 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <input type="number" id="expense-amount-1" name="expense-amount[]" step="0.01" required>
                             </div>
                             <div class="form-group">
-                                <label for="expense-currency-1">Waluta:</label>
-                                <select id="expense-currency-1" name="expense-currency[]" required>
-                                    <option value="PLN">PLN</option>
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <label for="expense-description-1">Opis:</label>
                                 <input type="text" id="expense-description-1" name="expense-description[]" required>
                             </div>
@@ -55,6 +47,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <button type="button" id="add-expense-button" class="add-expense-button">Dodaj wydatek</button>
+                    <div class="form-group">
+                        <label for="total-amount">Całkowity koszt:</label>
+                        <input type="number" id="total-amount" name="total-amount" step="0.01" readonly>
+                    </div>
                     <div class="form-actions">
                         <button type="button" id="cancel-button">Anuluj</button>
                         <button type="submit">Zapisz delegację</button>
@@ -67,6 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('cancel-button').addEventListener('click', function() {
             formContainer.style.display = 'none';
             mainContent.style.display = 'block';
+        });
+
+        updateTotalAmount();
+        document.querySelectorAll('[id^="expense-amount-"]').forEach(input => {
+            input.addEventListener('input', updateTotalAmount);
         });
     });
 
@@ -86,14 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" id="expense-amount-${expenseCount}" name="expense-amount[]" step="0.01" required>
             </div>
             <div class="form-group">
-                <label for="expense-currency-${expenseCount}">Waluta:</label>
-                <select id="expense-currency-${expenseCount}" name="expense-currency[]" required>
-                    <option value="PLN">PLN</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                </select>
-            </div>
-            <div class="form-group">
                 <label for="expense-description-${expenseCount}">Opis:</label>
                 <input type="text" id="expense-description-${expenseCount}" name="expense-description[]" required>
             </div>
@@ -104,6 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" class="remove-expense-button" onclick="removeExpense(this)">Usuń wydatek</button>
         `;
         expensesContainer.appendChild(expenseItem);
+
+        document.getElementById(`expense-amount-${expenseCount}`).addEventListener('input', updateTotalAmount);
     }
 
     window.removeExpense = function(button) {
@@ -111,6 +106,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const expensesContainer = document.getElementById('expenses-container');
         if (expensesContainer.children.length > 1) {
             expensesContainer.removeChild(expenseItem);
+            updateTotalAmount();
         }
     };
+
+    function updateTotalAmount() {
+        const expenseAmounts = document.querySelectorAll('[id^="expense-amount-"]');
+        let totalAmount = 0;
+        expenseAmounts.forEach(input => {
+            totalAmount += parseFloat(input.value) || 0;
+        });
+        document.getElementById('total-amount').value = totalAmount.toFixed(2);
+    }
 });

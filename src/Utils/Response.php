@@ -1,10 +1,12 @@
 <?php
+namespace Utils;
 
 class Response
 {
-    public array $data;
-    public string $message, $cssClass;
-    public bool $error;
+    public $data;
+    public $message;
+    public $cssClass;
+    public $error;
 
     public function __construct()
     {
@@ -14,3 +16,4 @@ class Response
         $this->error = false;
     }
 }
+?>

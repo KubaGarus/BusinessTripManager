@@ -1,9 +1,13 @@
-<?php require '../src/templates/header.php'; ?>
+<?php
+namespace Views;
+
+require_once __DIR__ . '/../templates/header.php';
+?>
 
 <div class="register-container">
     <form id="register-form" action="index.php?action=register" method="POST">
         <h2>Rejestracja</h2>
-        <?php 
+        <?php
         echo "<p class='" . $this->response->cssClass . "'>" . $this->response->message . "</p>";
         ?>
         <input type="hidden" name="action" value="register" />
@@ -36,4 +40,4 @@
     </form>
 </div>
 
-<?php require '../src/templates/footer.php'; ?>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

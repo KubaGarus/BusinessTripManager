@@ -1,27 +1,37 @@
 <?php
-require '../src/templates/header.php';
+namespace Views;
+
+require_once __DIR__ . '/../templates/header.php';
+
 if (isset($_SESSION['function']) && $_SESSION['function'] === -9) {
-    $adminButton = "<li><a href='admin.php'>Admin</a></li>";
+    $adminButton = "<li><a href='index.php?action=admin'>Admin</a></li>";
 } else {
     $adminButton = "";
 }
 
-require_once __DIR__ . "/../Controllers/BusinessTripController.php";
-$businessTripController = new BusinessTripController;
-if (isset($_POST['trip-purpose']) && isset($_POST['transportation-mode'])) {
-    $businessTripController->createBusinessTripHandler($_SESSION['user_id'], $_POST, $_FILES ?? []);
-}
+require_once __DIR__ . '/../Controllers/BusinessTripController.php';
+$businessTripController = new \Controllers\BusinessTripController();
 
-if (isset($_POST['delete_trip_id'])) {
-    $businessTripController->deleteBusinessTripHandler($_POST['delete_trip_id']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['trip-purpose']) && isset($_POST['transportation-mode'])) {
+        $businessTripController->createBusinessTripHandler($_SESSION['user_id'], $_POST, $_FILES ?? []);
+    } elseif (isset($_POST['delete_trip_id'])) {
+        $businessTripController->deleteBusinessTripHandler($_POST['delete_trip_id']);
+    } elseif (isset($_POST['edit_trip_id'])) {
+        header('Content-Type: application/json');
+        $tripData = $businessTripController->getBusinessTripById((int)$_POST['edit_trip_id']);
+        echo json_encode($tripData);
+        exit;
+    }
 }
 
 $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id']);
 ?>
+
 <div class="container">
     <header>
         <div class="user-info">
-            <?php echo('Witaj, ' . htmlspecialchars($userInfo['username']) . ".");  ?>
+            <?php echo('Witaj, ' . htmlspecialchars($_SESSION['username']) . "."); ?>
         </div>
         <div class="logout">
             <a href="index.php?action=logout">Wyloguj</a>
@@ -30,13 +40,13 @@ $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id'])
     <nav>
         <ul>
             <li><a href="index.php?action=dashboard">Moje wydatki</a></li>
-            <li><a href="manager.php">Manager</a></li>
+            <li><a href="index.php?action=manager">Manager</a></li>
             <?= $adminButton ?>
         </ul>
     </nav>
     <div class="main-content">
         <main id="main-content">
-            <?php          
+            <?php
             if (!empty($businessTrips)) {
                 ?>
                     <div class="trip-header">
@@ -61,12 +71,14 @@ $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id'])
                             <span>" . htmlspecialchars($trip['intrudaction_date']) . "</span>
                             <span>" . htmlspecialchars($trip['acceptance_date'] ?? 'N/A') . "</span>
                             <span>" . $statusArr[$trip['status']] . "</span>
-                            <span>
-                                <button type='button' class='btn-small blue edit-trip-button'>Edytuj</button>
-                                <button type='submit' class='btn-small red'>Usuń</button>
+                            <span>";
+                    
+                    $style = $trip['status'] !== 3 ? "" : "style='display:none'";
+                    echo "<button type='button' class='btn-small blue edit-trip-button' data-id='" . htmlspecialchars($trip['business_trip_id']) . "' " . $style . ">Edytuj</button>";
+                    echo "<button type='submit' class='btn-small red'>Usuń</button>
                             </span>
                         </form>";
-                }    
+                }
             } else {
                 echo "Nie znaleziono delegacji tego użytkownika.";
             }
@@ -78,4 +90,4 @@ $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id'])
     </div>
 </div>
 <script src="/assets/js/new_business_trip.js"></script>
-<?php require '../src/templates/footer.php'; ?>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

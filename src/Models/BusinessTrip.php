@@ -26,9 +26,78 @@ class BusinessTrip {
 
     public function getAllBusinessTrips(int $user_id): array
     {
-        $query = $this->db->prepare('SELECT * FROM business_trips WHERE user_id = :user_id');
+        $query = $this->db->prepare('
+            SELECT 
+                bt.business_trip_id,
+                bt.user_id,
+                bt.intrudaction_date,
+                bt.acceptance_date,
+                bt.status,
+                btb.purpose,
+                btb.transport,
+                exp.expense_id,
+                exp.expense_date,
+                exp.cost,
+                exp.note,
+                exp.attachment_id,
+                att.name AS attachment_name,
+                att.size AS attachment_size,
+                att.type AS attachment_type,
+                att.content AS attachment_content
+            FROM business_trips bt
+            LEFT JOIN business_trips_basic_data btb ON bt.business_trip_id = btb.business_trip_id
+            LEFT JOIN business_trips_expenses exp ON bt.business_trip_id = exp.business_trip_id
+            LEFT JOIN business_trips_expenses_attachments att ON exp.attachment_id = att.attachment_id
+            WHERE bt.user_id = :user_id
+        ');
         $query->execute(["user_id" => $user_id]);
-        return $query->fetchAll(PDO::FETCH_ASSOC);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        // Procesowanie wyników, aby zgrupować wydatki i załączniki według delegacji
+        $businessTrips = [];
+        foreach ($result as $row) {
+            $tripId = $row['business_trip_id'];
+
+            // Sprawdź, czy delegacja już istnieje w wyniku
+            if (!isset($businessTrips[$tripId])) {
+                $businessTrips[$tripId] = [
+                    'business_trip_id' => $row['business_trip_id'],
+                    'user_id' => $row['user_id'],
+                    'intrudaction_date' => $row['intrudaction_date'],
+                    'acceptance_date' => $row['acceptance_date'],
+                    'status' => $row['status'],
+                    'purpose' => $row['purpose'],
+                    'transport' => $row['transport'],
+                    'expenses' => []
+                ];
+            }
+
+            // Dodaj wydatek, jeśli istnieje
+            if ($row['expense_id']) {
+                $expense = [
+                    'expense_id' => $row['expense_id'],
+                    'expense_date' => $row['expense_date'],
+                    'cost' => $row['cost'],
+                    'note' => $row['note'],
+                    'attachment' => null
+                ];
+
+                // Dodaj załącznik, jeśli istnieje
+                if ($row['attachment_id']) {
+                    $expense['attachment'] = [
+                        'attachment_id' => $row['attachment_id'],
+                        'name' => $row['attachment_name'],
+                        'size' => $row['attachment_size'],
+                        'type' => $row['attachment_type'],
+                        'content' => $row['attachment_content']
+                    ];
+                }
+
+                $businessTrips[$tripId]['expenses'][] = $expense;
+            }
+        }
+
+        return array_values($businessTrips);
     }
 
     public function getAllBusinessTripsForManager(): array
@@ -98,6 +167,4 @@ class BusinessTrip {
 
         return ['trip' => $trip, 'expenses' => $expenses];
     }
-
 }
-?>

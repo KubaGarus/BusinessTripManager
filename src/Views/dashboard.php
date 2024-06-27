@@ -11,18 +11,15 @@ if (isset($_SESSION['function']) && $_SESSION['function'] === -9) {
 
 require_once __DIR__ . '/../Controllers/BusinessTripController.php';
 $businessTripController = new \Controllers\BusinessTripController();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['trip-purpose']) && isset($_POST['transportation-mode'])) {
-        $businessTripController->createBusinessTripHandler($_SESSION['user_id'], $_POST, $_FILES ?? []);
-    } elseif (isset($_POST['delete_trip_id'])) {
-        $businessTripController->deleteBusinessTripHandler($_POST['delete_trip_id']);
-    } elseif (isset($_POST['edit_trip_id'])) {
-        header('Content-Type: application/json');
-        $tripData = $businessTripController->getBusinessTripById((int)$_POST['edit_trip_id']);
-        echo json_encode($tripData);
-        exit;
+if (isset($_POST['trip-purpose']) && isset($_POST['transportation-mode'])) {
+    $businessTripController->createBusinessTripHandler($_SESSION['user_id'], $_POST, $_FILES ?? []);
+    if (isset($_POST['business_trip_id']) && $_POST['business_trip_id'] != "") {
+        $businessTripController->deleteBusinessTripHandler($_POST['business_trip_id']);
     }
+}
+
+if (isset($_POST['delete_trip_id'])) {
+    $businessTripController->deleteBusinessTripHandler($_POST['delete_trip_id']);
 }
 
 $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id']);
@@ -74,7 +71,7 @@ $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id'])
                             <span>";
                     
                     $style = $trip['status'] !== 3 ? "" : "style='display:none'";
-                    echo "<button type='button' class='btn-small blue edit-trip-button' data-id='" . htmlspecialchars($trip['business_trip_id']) . "' " . $style . ">Edytuj</button>";
+                    echo "<button type='button' class='btn-small blue edit-trip-button' data-trip='" . htmlspecialchars(json_encode($trip, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . "' " . $style . ">Edytuj</button>";
                     echo "<button type='submit' class='btn-small red'>Usuń</button>
                             </span>
                         </form>";

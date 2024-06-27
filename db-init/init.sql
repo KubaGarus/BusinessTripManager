@@ -42,15 +42,3 @@ CREATE TABLE business_trips_basic_data (
     transport VARCHAR(255) NOT NULL,
     business_trip_id INT NOT NULL
 );
-
--- CREATE TABLE business_trips_options (
-
--- );
-
--- CREATE TABLE business_trips_places (
-
--- );
-
--- CREATE TABLE business_trips_lump_sums (
-
--- );

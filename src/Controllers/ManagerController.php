@@ -14,18 +14,35 @@ class ManagerController
         $this->businessTrip = new BusinessTrip();
     }
 
-    public function showAllBusinessTrips()
+    /**
+     * Show all business trips
+     *
+     * @return array
+     */
+    public function showAllBusinessTrips(): array
     {
         require_once __DIR__ . '/../Views/manager.php';
-        return $businessTrips = $this->businessTrip->getAllBusinessTripsForManager();
+        return $this->businessTrip->getAllBusinessTripsForManager();
     }
 
-    public function acceptBusinessTrip(int $businessTripID)
+    /**
+     * Accept business trip handler
+     *
+     * @param integer $businessTripID
+     * @return void
+     */
+    public function acceptBusinessTrip(int $businessTripID): void
     {   
         $this->businessTrip->updateStatus($businessTripID, 3);
     }
 
-    public function deleteBusinessTrip(int $businessTripID)
+    /**
+     * delete business trip handler
+     *
+     * @param integer $businessTripID
+     * @return void
+     */
+    public function deleteBusinessTrip(int $businessTripID): void
     {
         $this->businessTrip->deleteAllBusinessTripData($businessTripID);
     }

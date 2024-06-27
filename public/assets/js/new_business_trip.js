@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(event) {
         if (event.target.classList.contains('edit-trip-button')) {
             const tripData = JSON.parse(event.target.getAttribute('data-trip'));
-            // console.log(tripData);
             showForm(tripData);
         }
     });
+
     function showForm(tripData = null) {
         mainContent.style.display = 'none';
         formContainer.style.display = 'block';
@@ -37,24 +37,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 <form id="business-trip-form" method="POST" action="index.php?action=dashboard" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="dashboard" />
                     <input type="hidden" name="business_trip_id" value="${tripData ? tripData.business_trip_id : ''}" />
-                    <div class="form-group">
-                        <label for="trip-purpose">Cel podróży:</label>
-                        <input type="text" id="trip-purpose" name="trip-purpose" value="${tripPurpose}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="transportation-mode">Środek transportu:</label>
-                        <select id="transportation-mode" name="transportation-mode" required>
-                            <option value="auto" ${transportationMode === 'auto' ? 'selected' : ''}>Auto</option>
-                            <option value="pociąg" ${transportationMode === 'pociąg' ? 'selected' : ''}>Pociąg</option>
-                            <option value="samolot" ${transportationMode === 'samolot' ? 'selected' : ''}>Samolot</option>
-                            <option value="komunikacja miejska" ${transportationMode === 'komunikacja miejska' ? 'selected' : ''}>Komunikacja miejska</option>
-                        </select>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="trip-purpose">Cel podróży:</label>
+                            <input type="text" id="trip-purpose" name="trip-purpose" value="${tripPurpose}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transportation-mode">Środek transportu:</label>
+                            <select id="transportation-mode" name="transportation-mode" required>
+                                <option value="auto" ${transportationMode === 'auto' ? 'selected' : ''}>Auto</option>
+                                <option value="pociąg" ${transportationMode === 'pociąg' ? 'selected' : ''}>Pociąg</option>
+                                <option value="samolot" ${transportationMode === 'samolot' ? 'selected' : ''}>Samolot</option>
+                                <option value="komunikacja miejska" ${transportationMode === 'komunikacja miejska' ? 'selected' : ''}>Komunikacja miejska</option>
+                            </select>
+                        </div>
                     </div>
                     <div id="expenses-container">
                         ${expensesHTML}
                     </div>
                     <button type="button" id="add-expense-button" class="add-expense-button">Dodaj wydatek</button>
-                    <div class="form-group">
+                    <br/><br/><div class="form-group">
                         <label for="total-amount">Całkowity koszt:</label>
                         <input type="number" id="total-amount" name="total-amount" step="0.01" readonly>
                     </div>
@@ -80,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function generateExpenseHTML(expenseCount, expense = {}) {
         return `
-            <div class="expense-item">
+            <div class="expense-item" id="expense-item-${expenseCount}">
                 <h3>Wydatek ${expenseCount}</h3>
                 <div class="form-group">
                     <label for="expense-date-${expenseCount}">Data:</label>
@@ -94,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label for="expense-description-${expenseCount}">Opis:</label>
                     <input type="text" id="expense-description-${expenseCount}" name="expense-description[]" value="${expense.note || ''}" required>
                 </div>
-                <button type="button" class="remove-expense-button" onclick="removeExpense(this)">Usuń wydatek</button>
+                <button type="button" class="remove-expense-button" onclick="removeExpense(${expenseCount})">Usuń wydatek</button>
             </div>
         `;
     }
@@ -104,14 +106,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const expenseCount = expensesContainer.children.length + 1;
         const expenseItem = document.createElement('div');
         expenseItem.className = 'expense-item';
+        expenseItem.id = `expense-item-${expenseCount}`;
         expenseItem.innerHTML = generateExpenseHTML(expenseCount);
         expensesContainer.appendChild(expenseItem);
 
         document.getElementById(`expense-amount-${expenseCount}`).addEventListener('input', updateTotalAmount);
     }
 
-    window.removeExpense = function(button) {
-        const expenseItem = button.parentElement;
+    window.removeExpense = function(expenseCount) {
+        const expenseItem = document.getElementById(`expense-item-${expenseCount}`);
         const expensesContainer = document.getElementById('expenses-container');
         if (expensesContainer.children.length > 1) {
             expensesContainer.removeChild(expenseItem);

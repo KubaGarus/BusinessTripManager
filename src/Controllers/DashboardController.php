@@ -8,7 +8,13 @@ use Models\User;
 use Utils\Response;
 
 class DashboardController {
-    public function showDashboard() {
+    /**
+     * Show dashboard panel
+     *
+     * @return void
+     */
+    public function showDashboard(): void
+    {
         if (isset($_SESSION['username'])) {
             $user = new User();
             $userInfo = $user->getUserInfo($_SESSION['username']);
@@ -20,12 +26,23 @@ class DashboardController {
         }
     }
 
-    public function logout() {
+    /**
+     * Logout handler
+     *
+     * @return void
+     */
+    public function logout(): void
+    {
         session_destroy();
         header('Location: index.php?action=login');
     }
 
-    public function showAdminPanel()
+    /**
+     * Show admin panel
+     *
+     * @return void
+     */
+    public function showAdminPanel(): void
     {
         require_once __DIR__ . '/../Views/admin.php';
     }

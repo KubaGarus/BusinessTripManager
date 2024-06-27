@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formContainer.innerHTML = `
             <div class="container main-content">
                 <h2>Nowa Delegacja</h2>
-                <form id="business-trip-form" method="POST" action="index.php?action=dashboard">
+                <form id="business-trip-form" method="POST" action="index.php?action=dashboard" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="dashboard" />
                     <div class="form-group">
                         <label for="trip-purpose">Cel podróży:</label>

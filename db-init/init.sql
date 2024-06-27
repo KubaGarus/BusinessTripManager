@@ -19,26 +19,29 @@ CREATE TABLE business_trips (
     status INT NOT NULL
 );
 
--- CREATE TABLE business_trips_expenses (
---     expense_id SERIAL PRIMARY KEY,
---     expense_type INT(1) NOT NULL,
---     expense_date DATE NOT NULL,
---     cost FLOAT NOT NULL,
---     note VARCHAR(100) NOT NULL,
---     attachment_id INT DEFAULT 0
--- );
+CREATE TABLE business_trips_expenses (
+    expense_id SERIAL PRIMARY KEY,
+    expense_date DATE NOT NULL,
+    cost FLOAT NOT NULL,
+    note VARCHAR(100) NOT NULL,
+    business_trip_id INT NOT NULL,
+    attachment_id INT DEFAULT 0
+);
 
--- CREATE TABLE business_trips_expenses_attachments (
---     attachment_id SERIAL PRIMARY KEY,
---     name VARCHAR(100) NOT NULL,
---     size INT(100) NOT NULL,
---     type VARCHAR(100) NOT NULL,
---     content BLOB NOT NULL
--- );
+CREATE TABLE business_trips_expenses_attachments (
+    attachment_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    size INT NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    content BYTEA NOT NULL
+);
 
--- CREATE TABLE business_trips_basic_data (
-
--- );
+CREATE TABLE business_trips_basic_data (
+    business_trip_basic_id SERIAL PRIMARY KEY,
+    purpose VARCHAR(255) NOT NULL,
+    transport VARCHAR(255) NOT NULL,
+    business_trip_id INT NOT NULL
+);
 
 -- CREATE TABLE business_trips_options (
 

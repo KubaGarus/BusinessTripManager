@@ -17,6 +17,12 @@ class BusinessTrip {
         $this->db = new PDO($this->config['dsn'], $this->config['username'], $this->config['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_PERSISTENT => false, PDO::ATTR_EMULATE_PREPARES => false]);
     }
 
+    /**
+     * Create business trip
+     *
+     * @param integer $user_id
+     * @return integer
+     */
     public function createBusinessTrip(int $user_id): int
     {
         $stmt = $this->db->prepare('INSERT INTO business_trips (user_id, intrudaction_date, acceptance_date, status) VALUES (:user_id, :intrudaction_date, :acceptance_date, :status) RETURNING business_trip_id');
@@ -24,13 +30,89 @@ class BusinessTrip {
         return $stmt->fetchColumn();
     }
 
+    /**
+     * Get all of existing busienss trip user data
+     *
+     * @param integer $user_id
+     * @return array
+     */
     public function getAllBusinessTrips(int $user_id): array
     {
-        $query = $this->db->prepare('SELECT * FROM business_trips WHERE user_id = :user_id');
+        $query = $this->db->prepare('
+            SELECT 
+                bt.business_trip_id,
+                bt.user_id,
+                bt.intrudaction_date,
+                bt.acceptance_date,
+                bt.status,
+                btb.purpose,
+                btb.transport,
+                exp.expense_id,
+                exp.expense_date,
+                exp.cost,
+                exp.note,
+                exp.attachment_id,
+                att.name AS attachment_name,
+                att.size AS attachment_size,
+                att.type AS attachment_type,
+                att.content AS attachment_content
+            FROM business_trips bt
+            LEFT JOIN business_trips_basic_data btb ON bt.business_trip_id = btb.business_trip_id
+            LEFT JOIN business_trips_expenses exp ON bt.business_trip_id = exp.business_trip_id
+            LEFT JOIN business_trips_expenses_attachments att ON exp.attachment_id = att.attachment_id
+            WHERE bt.user_id = :user_id
+        ');
         $query->execute(["user_id" => $user_id]);
-        return $query->fetchAll(PDO::FETCH_ASSOC);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        $businessTrips = [];
+        foreach ($result as $row) {
+            $tripId = $row['business_trip_id'];
+
+            if (!isset($businessTrips[$tripId])) {
+                $businessTrips[$tripId] = [
+                    'business_trip_id' => $row['business_trip_id'],
+                    'user_id' => $row['user_id'],
+                    'intrudaction_date' => $row['intrudaction_date'],
+                    'acceptance_date' => $row['acceptance_date'],
+                    'status' => $row['status'],
+                    'purpose' => $row['purpose'],
+                    'transport' => $row['transport'],
+                    'expenses' => []
+                ];
+            }
+
+            if ($row['expense_id']) {
+                $expense = [
+                    'expense_id' => $row['expense_id'],
+                    'expense_date' => $row['expense_date'],
+                    'cost' => $row['cost'],
+                    'note' => $row['note'],
+                    'attachment' => null
+                ];
+
+                if ($row['attachment_id']) {
+                    $expense['attachment'] = [
+                        'attachment_id' => $row['attachment_id'],
+                        'name' => $row['attachment_name'],
+                        'size' => $row['attachment_size'],
+                        'type' => $row['attachment_type'],
+                        'content' => $row['attachment_content']
+                    ];
+                }
+
+                $businessTrips[$tripId]['expenses'][] = $expense;
+            }
+        }
+
+        return array_values($businessTrips);
     }
 
+    /**
+     * Get business trips for manager
+     *
+     * @return array
+     */
     public function getAllBusinessTripsForManager(): array
     {
         $query = $this->db->prepare(
@@ -42,12 +124,31 @@ class BusinessTrip {
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function saveExpenses(string $date, float $cost, string $note, int $businessTripID, int $attachmentID)
+    /**
+     * save expenses
+     *
+     * @param string $date
+     * @param float $cost
+     * @param string $note
+     * @param integer $businessTripID
+     * @param integer $attachmentID
+     * @return void
+     */
+    public function saveExpenses(string $date, float $cost, string $note, int $businessTripID, int $attachmentID): void
     {
         $stmt = $this->db->prepare('INSERT INTO business_trips_expenses (expense_date, cost, note, business_trip_id, attachment_id) VALUES (:expense_date, :cost, :note, :business_trip_id, :attachment_id)');
-        return $stmt->execute(["expense_date" => $date, "cost" => $cost, "note" => $note, "business_trip_id" => $businessTripID, "attachment_id" => $attachmentID]);
+        $stmt->execute(["expense_date" => $date, "cost" => $cost, "note" => $note, "business_trip_id" => $businessTripID, "attachment_id" => $attachmentID]);
     }
 
+    /**
+     * Save attachment
+     *
+     * @param string $fileName
+     * @param string $fileType
+     * @param integer $fileSize
+     * @param string $tmpName
+     * @return integer
+     */
     public function saveAttachment(string $fileName, string $fileType, int $fileSize, string $tmpName): int
     {
         $stmt = $this->db->prepare('INSERT INTO business_trips_expenses_attachments (name, size, type, content) VALUES (:name, :size, :type, :content) RETURNING attachment_id');
@@ -55,12 +156,26 @@ class BusinessTrip {
         return $stmt->fetchColumn();
     }
 
-    public function saveBasicData(string $purpose, string $transport, int $businessTripID)
+    /**
+     * save basic data like purpose and transport
+     *
+     * @param string $purpose
+     * @param string $transport
+     * @param integer $businessTripID
+     * @return void
+     */
+    public function saveBasicData(string $purpose, string $transport, int $businessTripID): void
     {
         $stmt = $this->db->prepare('INSERT INTO business_trips_basic_data (purpose, transport, business_trip_id) VALUES (:purpose, :transport, :business_trip_id)');
-        return $stmt->execute(["purpose" => $purpose, "transport" => $transport, "business_trip_id" => $businessTripID]);
+        $stmt->execute(["purpose" => $purpose, "transport" => $transport, "business_trip_id" => $businessTripID]);
     }
 
+    /**
+     * Delete all data
+     *
+     * @param integer $businessTripID
+     * @return void
+     */
     public function deleteAllBusinessTripData(int $businessTripID): void
     {
         $param = ["business_trip_id" => $businessTripID];
@@ -80,12 +195,25 @@ class BusinessTrip {
         }
     }
 
-    public function updateStatus(int $businessTripID, int $status)
+    /**
+     * update status of business trip
+     *
+     * @param integer $businessTripID
+     * @param integer $status
+     * @return void
+     */
+    public function updateStatus(int $businessTripID, int $status): void
     {
         $stmt = $this->db->prepare("UPDATE business_trips SET status = :status, acceptance_date = :acceptance_date WHERE business_trip_id = :business_trip_id");
         $stmt->execute(["status" => $status, "acceptance_date" => date("Y-m-d"), "business_trip_id" => $businessTripID]);
     }
 
+    /**
+     * Get businss trip by ID
+     *
+     * @param integer $tripId
+     * @return array
+     */
     public function getBusinessTripById(int $tripId): array
     {
         $stmt = $this->db->prepare('SELECT * FROM business_trips WHERE business_trip_id = :tripId');
@@ -98,6 +226,4 @@ class BusinessTrip {
 
         return ['trip' => $trip, 'expenses' => $expenses];
     }
-
 }
-?>

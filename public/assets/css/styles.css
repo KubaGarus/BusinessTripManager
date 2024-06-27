@@ -1,4 +1,3 @@
-/* General styling */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #e8eef7;
@@ -6,7 +5,6 @@ body {
     padding: 0;
 }
 
-/* Header styling */
 header {
     background-color: #2a3f54;
     color: white;
@@ -28,7 +26,6 @@ header .logout a {
     text-decoration: none;
 }
 
-/* Navigation styling */
 nav {
     background-color: #34495e;
     padding: 10px 0;
@@ -62,7 +59,6 @@ nav ul li a:hover {
     background-color: #1a2b3c;
 }
 
-/* Main content styling */
 .container {
     display: flex;
     flex-direction: column;
@@ -87,7 +83,6 @@ h1 {
     color: #2c3e50;
 }
 
-/* Forms styling */
 form {
     background-color: #f9f9f9;
     padding: 20px;
@@ -174,7 +169,6 @@ button[type="button"]:hover,
     background-color: #c82333;
 }
 
-/* Login and Register styling */
 #login-form,
 #register-form {
     max-width: 400px;
@@ -252,7 +246,6 @@ button[type="button"]:hover,
     color: #1a2b3c;
 }
 
-/* User list styling */
 #user-list {
     margin-top: 20px;
 }
@@ -298,7 +291,6 @@ button[type="button"]:hover,
     background-color: #c82333;
 }
 
-/* Trip list styling */
 .trip-header,
 .trip-row {
     display: grid;
@@ -330,7 +322,6 @@ button[type="button"]:hover,
     display: block;
 }
 
-/* Responsive styling */
 @media (max-width: 768px) {
     .trip-header, .trip-row {
         grid-template-columns: repeat(2, 1fr);
@@ -358,7 +349,7 @@ button[type="button"]:hover,
 .error {
     color: red;
 }
-/* Additional styles for alignment */
+
 .action-buttons {
     display: flex;
     gap: 10px;
@@ -366,12 +357,68 @@ button[type="button"]:hover,
 
 .trip-row .action-buttons form {
     margin: 0;
-    background-color: #ffffff;;
+    background-color: #ffffff;
 }
 
-.trip-row .action-buttons button {
+.trip-row span button {
     padding: 5px 10px;
     font-size: 0.9em;
     border-radius: 3px;
     cursor: pointer;
+}
+
+.form-inline {
+    display: flex;
+    justify-content: space-between;
+}
+
+.expense-item {
+    background-color: #ffffff;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expense-item .form-group {
+    display: inline-block;
+    width: calc(33.33% - 10px);
+    margin-right: 10px;
+}
+
+.expense-item .form-group:last-child {
+    margin-right: 0;
+}
+
+h3 {
+    color: #2a3f54;
+    margin-bottom: 10px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+button[type="submit"],
+#cancel-button {
+    width: 48%;
+}
+
+#add-expense-button {
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+}
+
+#add-expense-button:hover {
+    background-color: #0056b3;
+}
+
+#total-amount {
+    font-weight: bold;
 }

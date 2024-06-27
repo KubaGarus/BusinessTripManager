@@ -52,4 +52,3 @@ switch ($action) {
         $controller->showLoginForm();
         break;
 }
-?>

@@ -11,4 +11,3 @@ require_once __DIR__ . '/../src/Controllers/DashboardController.php';
 require_once __DIR__ . '/../src/Controllers/AdminController.php';
 require_once __DIR__ . '/../src/Controllers/BusinessTripController.php';
 require_once __DIR__ . '/../src/Controllers/ManagerController.php';
-?>

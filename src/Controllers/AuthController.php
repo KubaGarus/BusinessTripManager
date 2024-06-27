@@ -17,11 +17,23 @@ class AuthController {
         $this->response = new Response();
     }
 
-    public function showLoginForm() {
+    /**
+     * Show login form
+     *
+     * @return void
+     */
+    public function showLoginForm(): void
+    {
         require_once __DIR__ . '/../Views/login.php';
     }
 
-    public function login() {
+    /**
+     * Login handler
+     *
+     * @return void
+     */
+    public function login(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $username = $_POST['username'];
             $password = $_POST['password'];
@@ -39,11 +51,23 @@ class AuthController {
         require_once __DIR__ . '/../Views/login.php';
     }
 
-    public function showRegisterForm() {
+    /**
+     * Show register form
+     *
+     * @return void
+     */
+    public function showRegisterForm(): void
+    {
         require_once __DIR__ . '/../Views/register.php';
     }
 
-    public function register() {
+    /**
+     * Register handler
+     *
+     * @return void
+     */
+    public function register(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $username = $_POST['username'];
             $password = $_POST['password'];
@@ -71,10 +95,15 @@ class AuthController {
         require_once __DIR__ . '/../Views/register.php';
     }
 
-    public function logout() {
+    /**
+     * Logout handler
+     *
+     * @return void
+     */
+    public function logout()
+    {
         session_destroy();
         header("Location: index.php?action=login");
         exit();
     }
 }
-?>

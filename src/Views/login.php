@@ -1,4 +1,8 @@
-<?php require '../src/templates/header.php'; ?>
+<?php
+namespace Views;
+
+require_once __DIR__ . '/../templates/header.php';
+?>
 
 <div class="login-container">
     <form id="login-form" action="index.php?action=login" method="POST">
@@ -21,4 +25,4 @@
     </form>
 </div>
 
-<?php require '../src/templates/footer.php'; ?>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

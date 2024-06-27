@@ -1,49 +1,52 @@
 <?php
-require '../src/templates/header.php';
+namespace Views;
+
+require_once __DIR__ . '/../templates/header.php';
+
 if (isset($_SESSION['function']) && $_SESSION['function'] === -9) {
-    $adminButton = "<div class='admin'>
-        <form action='admin.php' method='POST' style='display: inline;'>
-            <input type='hidden' name='action' value='admin'>
-            <button type='submit'>Admin</button>
-        </form>
-    </div>";
+    $adminButton = "<li><a href='index.php?action=admin'>Admin</a></li>";
 } else {
     $adminButton = "";
 }
-// echo "<pre>";
-// print_r($_POST);
-// echo "</pre>";
-// echo "<pre>";
-// print_r($_FILES);
-// echo "</pre>";
-require_once __DIR__ . "/../Controllers/BusinessTripController.php";
-$businessTripController = new BusinessTripController;
-if (isset($_POST['trip-purpose']) && isset($_POST['transportation-mode'])) {
-    $businessTripController->createBusinessTripHandler($_SESSION['user_id'], $_POST, $_FILES ?? []);
+
+require_once __DIR__ . '/../Controllers/BusinessTripController.php';
+$businessTripController = new \Controllers\BusinessTripController();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['trip-purpose']) && isset($_POST['transportation-mode'])) {
+        $businessTripController->createBusinessTripHandler($_SESSION['user_id'], $_POST, $_FILES ?? []);
+    } elseif (isset($_POST['delete_trip_id'])) {
+        $businessTripController->deleteBusinessTripHandler($_POST['delete_trip_id']);
+    } elseif (isset($_POST['edit_trip_id'])) {
+        header('Content-Type: application/json');
+        $tripData = $businessTripController->getBusinessTripById((int)$_POST['edit_trip_id']);
+        echo json_encode($tripData);
+        exit;
+    }
 }
 
 $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id']);
 ?>
+
 <div class="container">
-    <aside class="sidebar">
-        <nav>
-            <ul>
-                <li><a href="index.php?action=dashboard">Moje wydatki</a></li>
-                <?= $adminButton ?>
-            </ul>
-        </nav>
-    </aside>
+    <header>
+        <div class="user-info">
+            <?php echo('Witaj, ' . htmlspecialchars($_SESSION['username']) . "."); ?>
+        </div>
+        <div class="logout">
+            <a href="index.php?action=logout">Wyloguj</a>
+        </div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.php?action=dashboard">Moje wydatki</a></li>
+            <li><a href="index.php?action=manager">Manager</a></li>
+            <?= $adminButton ?>
+        </ul>
+    </nav>
     <div class="main-content">
-        <header>
-            <div class="user-info">
-                <?php echo('Witaj, ' . htmlspecialchars($userInfo['username']) . ".");  ?>
-            </div>
-            <div class="logout">
-                <a href="index.php?action=logout">Wyloguj</a>
-            </div>
-        </header>
         <main id="main-content">
-            <?php          
+            <?php
             if (!empty($businessTrips)) {
                 ?>
                     <div class="trip-header">
@@ -51,25 +54,40 @@ $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id'])
                         <span>Data utworzenia:</span>
                         <span>Acceptance Date</span>
                         <span>Status</span>
+                        <span>Akcje</span>
                     </div>
                 <?php
                 foreach ($businessTrips as $trip) {
+                    $statusArr = [
+                        1 => "Wersja robocza",
+                        2 => "Wysłana do akceptacji",
+                        3 => "Zaakceptowana",
+                    ];
                     echo "
-                        <div class='trip-row'>
+                        <form method='POST' action='' class='trip-row'>
+                            <input type='hidden' name='delete_trip_id' value='" . htmlspecialchars($trip['business_trip_id']) . "' />
+                            <input type='hidden' name='action' value='dashboard'/>
                             <span>" . htmlspecialchars($trip['user_id']) . "</span>
                             <span>" . htmlspecialchars($trip['intrudaction_date']) . "</span>
                             <span>" . htmlspecialchars($trip['acceptance_date'] ?? 'N/A') . "</span>
-                            <span>" . htmlspecialchars($trip['status']) . "</span>
-                        </div>";
-                }    
+                            <span>" . $statusArr[$trip['status']] . "</span>
+                            <span>";
+                    
+                    $style = $trip['status'] !== 3 ? "" : "style='display:none'";
+                    echo "<button type='button' class='btn-small blue edit-trip-button' data-id='" . htmlspecialchars($trip['business_trip_id']) . "' " . $style . ">Edytuj</button>";
+                    echo "<button type='submit' class='btn-small red'>Usuń</button>
+                            </span>
+                        </form>";
+                }
             } else {
-                echo "No business trips found for this user.";
+                echo "Nie znaleziono delegacji tego użytkownika.";
             }
             ?>
+            <br/><br/>
             <button id="new-business-trip-button" class="new_business_trip_button">Utwórz nową delegację</button>
         </main>
         <div id="new-business-trip-form-container" style="display:none;"></div>
     </div>
 </div>
 <script src="/assets/js/new_business_trip.js"></script>
-<?php require '../src/templates/footer.php'; ?>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

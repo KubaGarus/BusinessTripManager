@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/../templates/header.php'; 
-require_once __DIR__ . '/../Controllers/AdminController.php';
-require_once __DIR__ . '/../Models/User.php';
+namespace Views;
 
-$adminController = new AdminController;
-$userManager = new User;
-var_dump($_POST);
+require_once __DIR__ . '/../templates/header.php';
+require_once __DIR__ . '/../Controllers/AdminController.php';
+
+$adminController = new \Controllers\AdminController();
+$userManager = new \Models\User();
 if (isset($_POST['delete'])) {
     $adminController->deleteUserHandler($_POST['id']);
 }
@@ -28,6 +28,8 @@ if (isset($_POST['edit_user'])) {
     <nav>
         <ul>
             <li><a href="index.php?action=dashboard">Moje wydatki</a></li>
+            <li><a href="index.php?action=manager">Manager</a></li>
+            <li><a href="index.php?action=admin">Admin</a></li>
         </ul>
     </nav>
     <main class="main-content">
@@ -45,23 +47,6 @@ if (isset($_POST['edit_user'])) {
                     <span>Akcje</span>
                 </div>
             <?php
-            // foreach ($users as $user) {
-            //     echo "
-            //         <form method='post' action=''>
-            //         <div class='user-row'>
-            //             <span>" . htmlspecialchars($user['firstname']) . "</span>
-            //             <span>" . htmlspecialchars($user['surname']) . "</span>
-            //             <span>" . htmlspecialchars($user['username']) . "</span>
-            //             <span>" . htmlspecialchars($user['mail_address']) . "</span>
-            //             <span>" . htmlspecialchars($user['function']) . "</span>
-            //             <span>
-            //                 <input type='hidden' name='id' value='" . $user['user_id'] . "' />
-            //                 <button name='delete' class='btn-small red'>Usuń</button>
-            //             </span>
-            //         </div>
-            //         </form>";
-            // }   
-            // Wewnątrz pętli foreach w admin.php
             foreach ($users as $user) {
                 echo "
                     <form method='post' action=''>
@@ -83,10 +68,11 @@ if (isset($_POST['edit_user'])) {
             echo "Brak wyników.";
         }
         ?>
+        <br /><br />
         <button type="button" id="new-user-button">Nowy użytkownik</button>
         </div>
         <div id="registration-form-container"></div>
     </main>
 </div>
 <script src="/assets/js/admin.js"></script>
-<?php require '../src/templates/footer.php'; ?>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

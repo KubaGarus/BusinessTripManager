@@ -26,4 +26,16 @@ class Admin
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function update(string $firstName, string $surname, string $username, string $mail_address, int $function, int $userID)
+    {
+        $stmt = $this->db->prepare("UPDATE users SET firstname = :firstname, surname = :surname, username = :username, mail_address = :mail_address, function = :function  WHERE user_id = :user_id");
+        $stmt->execute(["firstname" => $firstName, "surname" => $surname, "username" => $username, "mail_address" => $mail_address, "function" => $function, "user_id" => $userID]);
+    }
+
+    public function updatePassword(string $password, int $userID)
+    {
+        $stmt = $this->db->prepare("UPDATE users SET password = :password  WHERE user_id = :user_id");
+        $stmt->execute(["password" => md5($password), "user_id" => $userID]);
+    }
 }

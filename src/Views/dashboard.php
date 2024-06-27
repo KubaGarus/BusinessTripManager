@@ -10,11 +10,16 @@ if (isset($_SESSION['function']) && $_SESSION['function'] === -9) {
 } else {
     $adminButton = "";
 }
-
+// echo "<pre>";
+// print_r($_POST);
+// echo "</pre>";
+// echo "<pre>";
+// print_r($_FILES);
+// echo "</pre>";
 require_once __DIR__ . "/../Controllers/BusinessTripController.php";
 $businessTripController = new BusinessTripController;
 if (isset($_POST['trip-purpose']) && isset($_POST['transportation-mode'])) {
-    $businessTripController->createBusinessTripHandler($_SESSION['user_id']);
+    $businessTripController->createBusinessTripHandler($_SESSION['user_id'], $_POST, $_FILES ?? []);
 }
 
 $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id']);

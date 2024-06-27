@@ -24,4 +24,13 @@ class AdminController
     {
         $this->admin->deleteUser($user_id);
     }
+
+    public function updateUser(array $data)
+    {
+        $this->admin->update($data['firstname'], $data['surname'], $data['username'], $data['email'], $data['function'], $data['user_id']);
+
+        if ($data['password'] !== "" && $data['confirm_password'] !== "" && $data['password'] === $data['confirm_password']) {
+            $this->admin->updatePassword($data['password'], $_POST['user_id']);
+        }
+    }
 }

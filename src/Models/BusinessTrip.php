@@ -48,4 +48,23 @@ class BusinessTrip {
         $stmt = $this->db->prepare('INSERT INTO business_trips_basic_data (purpose, transport, business_trip_id) VALUES (:purpose, :transport, :business_trip_id)');
         return $stmt->execute(["purpose" => $purpose, "transport" => $transport, "business_trip_id" => $businessTripID]);
     }
+
+    public function deleteAllBusinessTripData(int $businessTripID): void
+    {
+        $param = ["business_trip_id" => $businessTripID];
+        $queries = [
+            "DELETE FROM business_trips_expenses_attachments
+                 USING business_trips_expenses
+                 WHERE business_trips_expenses_attachments.attachment_id = business_trips_expenses.attachment_id
+                 AND business_trips_expenses.business_trip_id = :business_trip_id",
+            "DELETE FROM business_trips_expenses WHERE business_trip_id = :business_trip_id",
+            "DELETE FROM business_trips_basic_data WHERE business_trip_id = :business_trip_id",
+            "DELETE FROM business_trips WHERE business_trip_id = :business_trip_id"
+        ];
+
+        foreach ($queries as $query) {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute($param);
+        }
+    }
 }

@@ -34,4 +34,9 @@ class BusinessTripController
             }
         }
     }
+    
+    public function deleteBusinessTripHandler(int $businessTripID)
+    {
+        $this->businessTrip->deleteAllBusinessTripData($businessTripID);
+    }
 }

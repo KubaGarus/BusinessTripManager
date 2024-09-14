@@ -15,6 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+if (isset($_SESSION['function']) && $_SESSION['function'] === -9) {
+    $adminButton = "<li><a href='index.php?action=admin'>Admin</a></li>";
+} else {
+    $adminButton = "";
+}
+
 $businessTrips = $managerController->showAllBusinessTrips();
 ?>
 
@@ -31,7 +37,7 @@ $businessTrips = $managerController->showAllBusinessTrips();
         <ul>
             <li><a href="index.php?action=dashboard">Moje wydatki</a></li>
             <li><a href="index.php?action=manager">Manager</a></li>
-            <li><a href="index.php?action=admin">Admin</a></li>
+            <?= $adminButton ?>
         </ul>
     </nav>
     <div class="main-content">
@@ -57,7 +63,7 @@ $businessTrips = $managerController->showAllBusinessTrips();
                     echo "
                         <div class='trip-row'>
                             <span>" . htmlspecialchars($trip['firstname']) . " " . htmlspecialchars($trip['surname']) . "</span>
-                            <span>" . htmlspecialchars($trip['intrudaction_date']) . "</span>
+                            <span>" . htmlspecialchars($trip['introduction_date']) . "</span>
                             <span>" . htmlspecialchars($trip['acceptance_date'] ?? 'N/A') . "</span>
                             <span>" . $statusArr[$trip['status']] . "</span>
                             <span>

@@ -25,8 +25,8 @@ class BusinessTrip {
      */
     public function createBusinessTrip(int $user_id): int
     {
-        $stmt = $this->db->prepare('INSERT INTO business_trips (user_id, intrudaction_date, acceptance_date, status) VALUES (:user_id, :intrudaction_date, :acceptance_date, :status) RETURNING business_trip_id');
-        $stmt->execute(["user_id" => $user_id, "intrudaction_date" => date("Y-m-d"), "acceptance_date" => NULL, "status" => 1]);
+        $stmt = $this->db->prepare('INSERT INTO business_trips (user_id, introduction_date, acceptance_date, status) VALUES (:user_id, :introduction_date, :acceptance_date, :status) RETURNING business_trip_id');
+        $stmt->execute(["user_id" => $user_id, "introduction_date" => date("Y-m-d"), "acceptance_date" => NULL, "status" => 1]);
         return $stmt->fetchColumn();
     }
 
@@ -39,31 +39,10 @@ class BusinessTrip {
     public function getAllBusinessTrips(int $user_id): array
     {
         $query = $this->db->prepare('
-            SELECT 
-                bt.business_trip_id,
-                bt.user_id,
-                bt.intrudaction_date,
-                bt.acceptance_date,
-                bt.status,
-                btb.purpose,
-                btb.transport,
-                exp.expense_id,
-                exp.expense_date,
-                exp.cost,
-                exp.note,
-                exp.attachment_id,
-                att.name AS attachment_name,
-                att.size AS attachment_size,
-                att.type AS attachment_type,
-                att.content AS attachment_content
-            FROM business_trips bt
-            LEFT JOIN business_trips_basic_data btb ON bt.business_trip_id = btb.business_trip_id
-            LEFT JOIN business_trips_expenses exp ON bt.business_trip_id = exp.business_trip_id
-            LEFT JOIN business_trips_expenses_attachments att ON exp.attachment_id = att.attachment_id
-            WHERE bt.user_id = :user_id
+            SELECT * FROM  business_trips_informations_view WHERE user_id = :user_id
         ');
         $query->execute(["user_id" => $user_id]);
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
 
         $businessTrips = [];
         foreach ($result as $row) {
@@ -73,7 +52,7 @@ class BusinessTrip {
                 $businessTrips[$tripId] = [
                     'business_trip_id' => $row['business_trip_id'],
                     'user_id' => $row['user_id'],
-                    'intrudaction_date' => $row['intrudaction_date'],
+                    'introduction_date' => $row['introduction_date'],
                     'acceptance_date' => $row['acceptance_date'],
                     'status' => $row['status'],
                     'purpose' => $row['purpose'],
@@ -87,19 +66,8 @@ class BusinessTrip {
                     'expense_id' => $row['expense_id'],
                     'expense_date' => $row['expense_date'],
                     'cost' => $row['cost'],
-                    'note' => $row['note'],
-                    'attachment' => null
+                    'note' => $row['note']
                 ];
-
-                if ($row['attachment_id']) {
-                    $expense['attachment'] = [
-                        'attachment_id' => $row['attachment_id'],
-                        'name' => $row['attachment_name'],
-                        'size' => $row['attachment_size'],
-                        'type' => $row['attachment_type'],
-                        'content' => $row['attachment_content']
-                    ];
-                }
 
                 $businessTrips[$tripId]['expenses'][] = $expense;
             }
@@ -131,29 +99,12 @@ class BusinessTrip {
      * @param float $cost
      * @param string $note
      * @param integer $businessTripID
-     * @param integer $attachmentID
      * @return void
      */
-    public function saveExpenses(string $date, float $cost, string $note, int $businessTripID, int $attachmentID): void
+    public function saveExpenses(string $date, float $cost, string $note, int $businessTripID): void
     {
-        $stmt = $this->db->prepare('INSERT INTO business_trips_expenses (expense_date, cost, note, business_trip_id, attachment_id) VALUES (:expense_date, :cost, :note, :business_trip_id, :attachment_id)');
-        $stmt->execute(["expense_date" => $date, "cost" => $cost, "note" => $note, "business_trip_id" => $businessTripID, "attachment_id" => $attachmentID]);
-    }
-
-    /**
-     * Save attachment
-     *
-     * @param string $fileName
-     * @param string $fileType
-     * @param integer $fileSize
-     * @param string $tmpName
-     * @return integer
-     */
-    public function saveAttachment(string $fileName, string $fileType, int $fileSize, string $tmpName): int
-    {
-        $stmt = $this->db->prepare('INSERT INTO business_trips_expenses_attachments (name, size, type, content) VALUES (:name, :size, :type, :content) RETURNING attachment_id');
-        $stmt->execute(["name" => $fileName, "size" => $fileSize, "type" => $fileType, "content" => 1]); // file_get_contents($tmpName) może być użyty do odczytu zawartości
-        return $stmt->fetchColumn();
+        $stmt = $this->db->prepare('INSERT INTO business_trips_expenses (expense_date, cost, note, business_trip_id) VALUES (:expense_date, :cost, :note, :business_trip_id)');
+        $stmt->execute(["expense_date" => $date, "cost" => $cost, "note" => $note, "business_trip_id" => $businessTripID]);
     }
 
     /**
@@ -180,10 +131,6 @@ class BusinessTrip {
     {
         $param = ["business_trip_id" => $businessTripID];
         $queries = [
-            "DELETE FROM business_trips_expenses_attachments
-                 USING business_trips_expenses
-                 WHERE business_trips_expenses_attachments.attachment_id = business_trips_expenses.attachment_id
-                 AND business_trips_expenses.business_trip_id = :business_trip_id",
             "DELETE FROM business_trips_expenses WHERE business_trip_id = :business_trip_id",
             "DELETE FROM business_trips_basic_data WHERE business_trip_id = :business_trip_id",
             "DELETE FROM business_trips WHERE business_trip_id = :business_trip_id"

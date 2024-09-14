@@ -4,7 +4,10 @@ namespace Views;
 require_once __DIR__ . '/../templates/header.php';
 
 if (isset($_SESSION['function']) && $_SESSION['function'] === -9) {
-    $adminButton = "<li><a href='index.php?action=admin'>Admin</a></li>";
+    $adminButton = "<li><a href='index.php?action=manager'>Manager</a></li>
+                    <li><a href='index.php?action=admin'>Admin</a></li>";
+} else if (isset($_SESSION['function']) && $_SESSION['function'] === 3) {
+    $adminButton = "<li><a href='index.php?action=manager'>Manager</a></li>";
 } else {
     $adminButton = "";
 }
@@ -37,7 +40,6 @@ $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id'])
     <nav>
         <ul>
             <li><a href="index.php?action=dashboard">Moje wydatki</a></li>
-            <li><a href="index.php?action=manager">Manager</a></li>
             <?= $adminButton ?>
         </ul>
     </nav>
@@ -65,7 +67,7 @@ $businessTrips = $businessTripController->getBusinessTrips($_SESSION['user_id'])
                             <input type='hidden' name='delete_trip_id' value='" . htmlspecialchars($trip['business_trip_id']) . "' />
                             <input type='hidden' name='action' value='dashboard'/>
                             <span>" . htmlspecialchars($trip['user_id']) . "</span>
-                            <span>" . htmlspecialchars($trip['intrudaction_date']) . "</span>
+                            <span>" . htmlspecialchars($trip['introduction_date']) . "</span>
                             <span>" . htmlspecialchars($trip['acceptance_date'] ?? 'N/A') . "</span>
                             <span>" . $statusArr[$trip['status']] . "</span>
                             <span>";

@@ -51,12 +51,12 @@ class BusinessTripController
     {
         foreach ($data['expense-date'] as $key => $expenseDate) {
             if ($expenseDate !== "") {
-                $attachment_id = 0;
-                if(isset($files['expense-attachment']) && isset($files['expense-attachment']['name'][$key]) && $files['expense-attachment']['name'][$key] !== "") {
-                    $attachment_id = $this->businessTrip->saveAttachment($files['expense-attachment']['name'][$key], $files['expense-attachment']['type'][$key], $files['expense-attachment']['size'][$key], $files['expense-attachment']['tmp_name'][$key]);
-                }
+                // $attachment_id = 0;
+                // if(isset($files['expense-attachment']) && isset($files['expense-attachment']['name'][$key]) && $files['expense-attachment']['name'][$key] !== "") {
+                //     $attachment_id = $this->businessTrip->saveAttachment($files['expense-attachment']['name'][$key], $files['expense-attachment']['type'][$key], $files['expense-attachment']['size'][$key], $files['expense-attachment']['tmp_name'][$key]);
+                // }
 
-                $this->businessTrip->saveExpenses($expenseDate, $data['expense-amount'][$key], $data['expense-description'][$key], $businessTripID, $attachment_id);
+                $this->businessTrip->saveExpenses($expenseDate, $data['expense-amount'][$key], $data['expense-description'][$key], $businessTripID);
             }
         }
     }

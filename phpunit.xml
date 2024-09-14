@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="public/init.php">
+    <testsuites>
+        <testsuite name="Application Test Suite">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <env name="DB_HOST" value="172.20.0.10"/>
+        <env name="DB_NAME" value="business_trip_manager_db"/>
+        <env name="DB_USER" value="admin"/>
+        <env name="DB_PASSWORD" value="admin"/>
+    </php>
+</phpunit>
